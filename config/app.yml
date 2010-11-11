@@ -1,0 +1,4 @@
+default:
+  sfDoctrineMysqlSafeMigratePlugin:
+    mysql_dump_path: mysqldump
+    mysql_path: mysql
