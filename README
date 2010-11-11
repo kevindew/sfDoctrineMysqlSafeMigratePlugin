@@ -1,0 +1,53 @@
+sfDoctrineMysqlSafeMinifyPlugin
+===============================
+
+This plugin is to ease the usage of Doctrine migrations with MySQL database by
+adding the ability to roll back on an error. 
+
+Doctrine migrations are designed to roll back to the previous state when an
+error occurs but this cannot happen with MySQL (at least InnoDB) because of
+implicit commits on structure altering queries. To counter this problem this
+plugin uses mysqldump to get a snapshot of your database before the migration
+and then in the event of error or a migration dry run the backup will be
+restored. 
+
+Because of the nature of a database backup and a restore, there is the
+possibility for dataloss during the process of running a migration, with a
+large database this could of course make the process very slow. The primary
+usage of this plugin is for in a dev/test environment to ensure migration
+classes are accurate. 
+
+Installation
+------------
+
+  * Install as SVN External:
+      In shell
+        $ svn pe svn:externals
+      then add
+        sfDoctrineMysqlSafeMigratePlugin http://svn.github.com/kevindew/sfDoctrineMysqlSafeMigratePlugin.git
+      Activate plugin in ProjectConfiguration::Setup
+        $this->enablePlugins('sfDoctrineMysqlSafeMigratePlugin');
+
+  * Install From files
+      Download contents to
+        plugins/sfDoctrineMysqlSafeMigratePlugin
+      Activate plugin in ProjectConfiguration::Setup
+        $this->enablePlugins('sfDoctrineMysqlSafeMigratePlugin');
+
+
+Then in config/app.yml define the paths to your mysqldump and mysql for each
+environment
+
+Defaults are:
+default:
+  sfDoctrineMysqlSafeMigratePlugin:
+    mysql_dump_path: mysqldump
+    mysql_path: mysql
+
+
+Usage
+-----
+
+Once installed the task is ran by using doctrine:mysql-safe-migrate instead of
+doctrine:migrate. For further info type use
+./symfony help doctrine:mysql-safe-migrate
