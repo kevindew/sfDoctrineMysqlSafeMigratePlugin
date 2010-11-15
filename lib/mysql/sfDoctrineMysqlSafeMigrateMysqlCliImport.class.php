@@ -18,12 +18,23 @@ class sfDoctrineMysqlSafeMigrateMysqlCliImport
   protected $_mysqlPath = 'mysql';
 
   /**
+   * Arguments for mysql bin
+   *
+   * @var   string
+   */
+  protected $_mysqlArguments = '';
+
+  /**
    * @param   Doctrine_Connection_Mysql $connection
-   * @param   string                    $mysqlPath (Optional) default null
+   * @param   string|null               $mysqlPath (Optional) default null
+   * @param   string|null               $mysqlArguments (Optional) default
+   *                                    null
    * @return  void
    */
   public function  __construct(
-    Doctrine_Connection_Mysql $connection, $mysqlPath = null
+    Doctrine_Connection_Mysql $connection, 
+    $mysqlPath = null,
+    $mysqlArguments = null
   )
   {
     parent::__construct($connection);
@@ -31,6 +42,11 @@ class sfDoctrineMysqlSafeMigrateMysqlCliImport
     if ($mysqlPath !== null)
     {
       $this->setMysqlPath($mysqlPath);
+    }
+
+    if ($mysqlArguments !== null)
+    {
+      $this->setMysqlArguments($mysqlArguments);
     }
   }
 
@@ -51,6 +67,24 @@ class sfDoctrineMysqlSafeMigrateMysqlCliImport
   public function getMysqlPath()
   {
     return $this->_mysqlPath;
+  }
+
+  /**
+   * @param   string  $mysqlArguments
+   * @return  self
+   */
+  public function setMysqlArguments($mysqlArguments)
+  {
+    $this->_mysqlArguments = $mysqlArguments;
+    return $this;
+  }
+
+  /**
+   * @return  string
+   */
+  public function getMysqlArguments()
+  {
+    return $this->_mysqlArguments;
   }
 
   /**
@@ -90,6 +124,10 @@ class sfDoctrineMysqlSafeMigrateMysqlCliImport
 
     exec(
       escapeshellcmd($this->getMysqlPath())
+      . ($this->getMysqlArguments()
+        ? ' ' . escapeshellarg($this->getMysqlArguments())
+        : ''
+      )
       . $args 
       . ' < ' . escapeshellarg($path)
       . ' 2>&1'

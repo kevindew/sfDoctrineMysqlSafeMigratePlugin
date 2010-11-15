@@ -1,4 +1,7 @@
 default:
   sfDoctrineMysqlSafeMigratePlugin:
     mysql_dump_path: mysqldump
+    mysql_dump_arguments: -q
     mysql_path: mysql
+    mysql_arguments: ~
+    dump_date_format: u

@@ -22,7 +22,6 @@ class sfDoctrineMysqlSafeMigrateTask extends sfDoctrineMigrateTask
     $this->namespace = 'doctrine';
     $this->name = 'mysql-safe-migrate';
 
-
     $this->addOptions(array(
       new sfCommandOption(
         'target',
@@ -218,10 +217,10 @@ EOF;
             . ' environment will be dropped and the  backup file (located at '
             . $backupPath . ') will be used to restore the database.',
             '',
-            'Are you sure you want to proceed? (y/N)'
+            'Are you sure you want to proceed? (Y/n)'
           ),
           'QUESTION_LARGE',
-          false
+          true
         );
         
         if (!$confirmation)
@@ -331,7 +330,12 @@ EOF;
       ;
 
       $path = 
-        rtrim($path, '/') . '/' . time()
+        rtrim($path, '/') . '/' 
+        . date(
+          sfConfig::get(
+            'app_sfDoctrineMysqlSafeMigratePlugin_dump_date_format', 'u'
+          )
+        )
         . ($filenameSuffix ? '_' . $filenameSuffix : '')
         . '.sql'
       ;
@@ -355,7 +359,8 @@ EOF;
   {
     $exporter = new sfDoctrineMysqlSafeMigrateMysqlCliExport(
       $connection,
-      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_dump_path')
+      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_dump_path'),
+      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_dump_arguments')
     );
 
     try
@@ -389,7 +394,8 @@ EOF;
 
     $importer = new sfDoctrineMysqlSafeMigrateMysqlCliImport(
       $connection,
-      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_path')
+      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_path'),
+      sfConfig::get('app_sfDoctrineMysqlSafeMigratePlugin_mysql_arguments')
     );
 
     try
@@ -452,7 +458,7 @@ EOF;
     else
     {
       $this->logBlock(array_merge(
-        array('The following errors occurred:', ''),
+        array('The following migration errors occurred:', ''),
         array_map(
           create_function('$e', 'return \' - \'.$e->getMessage();'),
           $migration->getErrors()

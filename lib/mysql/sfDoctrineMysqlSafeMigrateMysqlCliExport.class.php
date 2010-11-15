@@ -18,12 +18,23 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
   protected $_mysqlDumpPath = 'mysqldump';
 
   /**
+   * Arguments for mysqldump
+   *
+   * @var   string
+   */
+  protected $_mysqlDumpArguments = '-q';
+
+  /**
    * @param   Doctrine_Connection_Mysql $connection
-   * @param   string                    $mysqlDumpPath (Optional) default null
+   * @param   string|null               $mysqlDumpPath (Optional) default null
+   * @param   string|null               $mysqlDumpArguments (Optional) default
+   *                                    null
    * @return  void
    */
   public function  __construct(
-    Doctrine_Connection_Mysql $connection, $mysqlDumpPath = null
+    Doctrine_Connection_Mysql $connection, 
+    $mysqlDumpPath = null,
+    $mysqlDumpArguments = null
   )
   {
     parent::__construct($connection);
@@ -31,6 +42,11 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
     if ($mysqlDumpPath !== null)
     {
       $this->setMysqlDumpPath($mysqlDumpPath);
+    }
+
+    if ($mysqlDumpArguments !== null)
+    {
+      $this->setMysqlDumpArguments($mysqlDumpArguments);
     }
   }
 
@@ -50,6 +66,24 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
   public function getMysqlDumpPath()
   {
     return $this->_mysqlDumpPath;
+  }
+
+  /**
+   * @param   string  $mysqlDumpArguments
+   * @return  self
+   */
+  public function setMysqlDumpArguments($mysqlDumpArguments)
+  {
+    $this->_mysqlDumpArguments = $mysqlDumpArguments;
+    return $this;
+  }
+
+  /**
+   * @return  string
+   */
+  public function getMysqlDumpArguments()
+  {
+    return $this->_mysqlDumpArguments;
   }
 
   /**
@@ -91,6 +125,10 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
 
     exec(
       escapeshellcmd($this->getMysqlDumpPath())
+      . ($this->getMysqlDumpArguments()
+        ? ' ' . escapeshellarg($this->getMysqlDumpArguments())
+        : ''
+      )
       . $args . ' 2>&1'
       , $output, $return
     );
