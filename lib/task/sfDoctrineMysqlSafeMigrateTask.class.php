@@ -323,17 +323,11 @@ EOF;
     {
       // create filename for backup
 
-      // get environment
-      $environment = $this->configuration instanceof sfApplicationConfiguration
-        ? $this->configuration->getEnvironment()
-        : 'all' // we dont really cater for this condition
-      ;
-
       $path = 
         rtrim($path, '/') . '/' 
         . date(
           sfConfig::get(
-            'app_sfDoctrineMysqlSafeMigratePlugin_dump_date_format', 'u'
+            'app_sfDoctrineMysqlSafeMigratePlugin_dump_date_format', 'U'
           )
         )
         . ($filenameSuffix ? '_' . $filenameSuffix : '')
