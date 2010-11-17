@@ -4,4 +4,4 @@ default:
     mysql_dump_arguments: -q
     mysql_path: mysql
     mysql_arguments: ~
-    dump_date_format: u
+    dump_date_format: U
