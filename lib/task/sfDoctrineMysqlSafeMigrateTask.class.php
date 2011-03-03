@@ -40,7 +40,13 @@ class sfDoctrineMysqlSafeMigrateTask extends sfDoctrineMigrateTask
         null,
         sfCommandOption::PARAMETER_NONE,
         'Keep the backup file that is generated'
-      )
+      ),
+      new sfCommandOption(
+        'disable-env',
+        null,
+        sfCommandOption::PARAMETER_NONE,
+        'Disable environment whilst migrating'
+      ),
     ));
 
     $this->briefDescription
@@ -132,6 +138,18 @@ EOF;
       return;
     }
 
+    if ($options['disable-env'])
+    {
+      $result = $this->enableDisableEnv($options['env'], false);
+      if (!$result)
+      {
+        $this->logSection(
+          'disable', 'Disabling failed task aborting', null, 'ERROR'
+        );
+        return 1;
+      }
+    }
+
     // check if it's a dry run
     if ($options['dry-run'] && !$noConfirmation)
     {
@@ -153,8 +171,10 @@ EOF;
       // allow user to abort
       if(!$confirmation)
       {
-        $this->logSection('doctrine', 'Task aborted');
+        $this->cleanUp($options);
 
+        $this->logSection('doctrine', 'Task aborted');
+        
         return 1;
       }
 
@@ -176,6 +196,8 @@ EOF;
     }
     catch (Exception $e)
     {
+      $this->cleanUp($options);
+
       $this->logBlock(
         array(
           'Dumping MySQL database failed:',
@@ -225,6 +247,8 @@ EOF;
         
         if (!$confirmation)
         {
+          $this->cleanUp($options);
+
           $this->logSection('mysql', 'Database restore task aborted');
           $this->logSection(
             'mysql', 'Database backup at ' . $backupPath . 'has not been deleted'
@@ -243,6 +267,7 @@ EOF;
       }
       catch (Exception $e)
       {
+        $this->cleanUp($options);
         $this->outputMigrationErrors($migration);
 
         $this->logBlock(
@@ -257,7 +282,6 @@ EOF;
         $this->logSection(
           'mysql', 'Database backup at ' . $backupPath . 'has not been deleted'
         );
-
         return 1;
       }
 
@@ -273,8 +297,8 @@ EOF;
 
     if ($migration->hasErrors())
     {
+      $this->cleanUp($options);
       $this->outputMigrationErrors($migration);
-
       return 1;
     }
     
@@ -458,6 +482,54 @@ EOF;
           $migration->getErrors()
         )
       ), 'ERROR_LARGE');
+    }
+  }
+
+  /**
+   * Enable / Disable environment
+   *
+   * @param   string  $env
+   * @param   bool    $enable
+   * @return  bool    success
+   */
+  protected function enableDisableEnv($env, $enable = true)
+  {
+    $task = $enable ? 'enable' : 'disable';
+
+    try
+    {
+      $this->runTask('project:' . $task, array('env' => $env));
+    }
+    catch(Exception $e)
+    {
+      $this->logBlock(
+        array(
+          'project:' . $task . ' failed for env ' . $env,
+          '',
+          $e->getMessage()
+        ),
+        'ERROR_LARGE'
+      );
+
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Method to be called on exiting to clean up task
+   *
+   * @param   array   $options
+   * @return  void
+   */
+  protected function cleanUp(array $options)
+  {
+    if (
+      isset($options['disable-env'], $options['env']) && $options['disable-env']
+    )
+    {
+      $this->enableDisableEnv($options['env'], true);
     }
   }
 }
