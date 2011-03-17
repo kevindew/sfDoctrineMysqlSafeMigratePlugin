@@ -301,6 +301,8 @@ EOF;
       $this->outputMigrationErrors($migration);
       return 1;
     }
+
+    $this->cleanUp($options);
     
     $this->logSection('doctrine', 'Migration complete');
   }
