@@ -129,7 +129,7 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
         ? ' ' . escapeshellarg($this->getMysqlDumpArguments())
         : ''
       )
-      . $args . ' 2>&1'
+      . $args . ' > ' . escapeshellarg($path) . ' 2>&1'
       , $output, $return
     );
 
@@ -139,14 +139,6 @@ class sfDoctrineMysqlSafeMigrateMysqlCliExport
       throw new Exception(
         'mysqldump failed. Command Returned: ' . implode(PHP_EOL, $output)
       );
-    }
-
-    // write output to file
-    $result = file_put_contents($path, implode(PHP_EOL, $output));
-
-    if ($result === false)
-    {
-      throw new Exception('Writing mysqldump to ' . $path . ' failed');
     }
   }
 }
